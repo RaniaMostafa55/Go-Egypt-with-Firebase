@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/auth/auth_bloc.dart';
 import 'package:go_egypt_with_firebase/dialog_utils.dart';
 import 'package:go_egypt_with_firebase/features/auth/views/sign_up_page.dart';
-import 'package:go_egypt_with_firebase/core/widgets/custom_text_buttom.dart';
+import 'package:go_egypt_with_firebase/features/auth/widgets/auth_text_button.dart';
 import 'package:go_egypt_with_firebase/features/layout/layout_view.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -141,15 +141,17 @@ class _LoginPageState extends State<LoginPage> {
                     },
                     text: S.of(context).Login,
                   ),
-                  CustomTextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(context, MaterialPageRoute(
-                          builder: (context) {
-                            return SignUpPage();
-                          },
-                        ));
-                      },
-                      text: "Don't have an account? Register")
+                  AuthTextButton(
+                    text: "Don't have an account? ",
+                    buttonText: "Register",
+                    onTap: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(
+                        builder: (context) {
+                          return SignUpPage();
+                        },
+                      ));
+                    },
+                  ),
                 ],
               ),
             ),

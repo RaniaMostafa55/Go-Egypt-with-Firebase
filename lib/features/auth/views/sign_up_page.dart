@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/auth/auth_bloc.dart';
 import 'package:go_egypt_with_firebase/dialog_utils.dart';
-import 'package:go_egypt_with_firebase/core/widgets/custom_text_buttom.dart';
 import 'package:go_egypt_with_firebase/features/auth/views/login_page.dart';
+import 'package:go_egypt_with_firebase/features/auth/widgets/auth_text_button.dart';
 import 'package:go_egypt_with_firebase/features/layout/layout_view.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
@@ -187,15 +187,17 @@ class _SignUpPageState extends State<SignUpPage> {
                     },
                     text: S.of(context).sign_up,
                   ),
-                  CustomTextButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(context, MaterialPageRoute(
-                          builder: (context) {
-                            return LoginPage();
-                          },
-                        ));
-                      },
-                      text: "Already have an account? Sign in")
+                  AuthTextButton(
+                    text: "Already have an account? ",
+                    buttonText: "Sign in",
+                    onTap: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(
+                        builder: (context) {
+                          return LoginPage();
+                        },
+                      ));
+                    },
+                  )
                 ],
               ),
             ),

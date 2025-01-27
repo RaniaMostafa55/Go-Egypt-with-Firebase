@@ -10,7 +10,7 @@ import 'package:go_egypt_with_firebase/features/auth/user-profile.dart';
 import 'package:go_egypt_with_firebase/features/auth/views/login_page.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/custom_editing_text_field.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/custom_list_tile.dart';
-import 'package:go_egypt_with_firebase/core/widgets/custom_text_buttom.dart';
+import 'package:go_egypt_with_firebase/core/widgets/global_text_buttom.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/profile_pic_frame.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
