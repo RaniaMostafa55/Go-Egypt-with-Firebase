@@ -7,9 +7,9 @@ import 'package:go_egypt_with_firebase/core/blocs/theme_bloc/theme_bloc.dart';
 import 'package:go_egypt_with_firebase/core/core_cubits/language_cubit.dart';
 import 'package:go_egypt_with_firebase/dialog_utils.dart';
 import 'package:go_egypt_with_firebase/features/auth/views/login_page.dart';
-import 'package:go_egypt_with_firebase/features/auth/widgets/show_editing_dialog.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/custom_list_tile.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/profile_pic_frame.dart';
+import 'package:go_egypt_with_firebase/features/profile/widgets/show_editing_dialog.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
@@ -21,13 +21,11 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-
   @override
   void initState() {
     super.initState();
     // Load profile data when the view is initialized
     context.read<ProfileBloc>().add(LoadProfile());
-
   }
 
   @override
@@ -113,11 +111,7 @@ class _ProfileViewState extends State<ProfileView> {
                       id: 'name',
                       onPressed: () {
                         EditingDialog.showEditDialog(
-                          context,
-                          'name',
-                          S.of(context).full_name,
-                          profile
-                        );
+                            context, 'name', S.of(context).full_name, profile);
                       },
                     ),
                     CustomListTile(
@@ -126,12 +120,8 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: profile.phone,
                       id: 'phone',
                       onPressed: () {
-                        EditingDialog.showEditDialog(
-                          context,
-                          'phone',
-                          S.of(context).phone_number,
-                          profile
-                        );
+                        EditingDialog.showEditDialog(context, 'phone',
+                            S.of(context).phone_number, profile);
                       },
                     ),
                     CustomListTile(
@@ -140,12 +130,12 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: profile.email,
                       id: 'email',
                       onPressed: () {
-                        EditingDialog.showEditDialog(
-                          context,
-                          'email',
-                          S.of(context).email_address,
-                          profile
-                        );
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                            "Email Address mustn't be changed",
+                          ),
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                        ));
                       },
                     ),
                     CustomListTile(
@@ -154,12 +144,8 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: hashedPassword(profile.password.length),
                       id: 'password',
                       onPressed: () {
-                        EditingDialog.showEditDialog(
-                          context,
-                          'password',
-                          S.of(context).password,
-                          profile
-                        );
+                        EditingDialog.showEditDialog(context, 'password',
+                            S.of(context).password, profile);
                       },
                     ),
                     SizedBox(height: 20),
@@ -214,5 +200,4 @@ class _ProfileViewState extends State<ProfileView> {
   String hashedPassword(int passLength) {
     return '*' * passLength;
   }
-
- }
+}

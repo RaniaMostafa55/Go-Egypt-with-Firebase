@@ -4,7 +4,6 @@ import 'package:go_egypt_with_firebase/core/helpers/shared_pref_helper.dart';
 import 'package:go_egypt_with_firebase/features/auth/user-profile.dart';
 
 part 'profile_event.dart';
-
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
@@ -67,11 +66,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 
   Future<UserProfile> getUserData() async {
-    String id = await SharedPrefHelper.getString('UserID');
+    String email = await SharedPrefHelper.getString('email');
     late UserProfile user;
     await db.collection('users').get().then((event) {
       for (var doc in event.docs) {
-        if (doc.id == id) {
+        if (UserProfile.fromFireStore(doc).email == email) {
           user = UserProfile.fromFireStore(doc);
         }
       }

@@ -56,11 +56,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           phone: phone));
       // to add user to database.
       var db = FirebaseFirestore.instance;
-      var user = UserProfile(name: username, email: emailAddress,password: password,phone: phone);
-     db.collection('users').add(user.toFireStore()).then((DocumentSnapshot)async{
-        await SharedPrefHelper.setData('UserID', DocumentSnapshot.id);
-     });
-
+      var user = UserProfile(
+          name: username,
+          email: emailAddress,
+          password: password,
+          phone: phone);
+      db.collection('users').add(user.toFireStore());
+      await SharedPrefHelper.setData('email', emailAddress);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.message.toString()),
@@ -75,6 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: emailAddress, password: password);
       add(LoginRequested(email: emailAddress, password: password));
+      await SharedPrefHelper.setData('email', emailAddress);
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.message.toString()),

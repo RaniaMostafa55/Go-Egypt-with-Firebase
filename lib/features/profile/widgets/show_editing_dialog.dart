@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/profile/profile_bloc.dart';
@@ -7,8 +8,7 @@ import 'package:go_egypt_with_firebase/features/profile/widgets/custom_editing_t
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 
 class EditingDialog {
-  static Future<void> showEditDialog(
-      BuildContext context, String id, String title, UserProfile state) async {
+  static Future<void> showEditDialog(BuildContext context, String id, String title, UserProfile state) async {
     String editedValue = '';
 
     return showDialog<void>(
@@ -39,7 +39,7 @@ class EditingDialog {
               children: [
                 CustomTextButton(
                   text: S.of(context).confirm,
-                  onPressed: () {
+                  onPressed: () async {
                     switch (id) {
                       case 'name':
                         user = UserProfile(
@@ -57,14 +57,6 @@ class EditingDialog {
                           phone: editedValue,
                         );
                         break;
-                      case 'email':
-                        user = UserProfile(
-                          name: state.name,
-                          email: editedValue,
-                          password: state.password,
-                          phone: state.phone,
-                        );
-                        break;
                       case 'password':
                         user = UserProfile(
                           name: state.name,
@@ -72,6 +64,8 @@ class EditingDialog {
                           password: editedValue,
                           phone: state.phone,
                         );
+                        await FirebaseAuth.instance.currentUser!
+                            .updatePassword(editedValue);
                         break;
                       default:
                     }
@@ -81,7 +75,7 @@ class EditingDialog {
                     Navigator.pop(context);
                     SnackBar snackBar = SnackBar(
                       content:
-                          Text(S.of(context).profile_has_successfully_updated),
+                      Text(S.of(context).profile_has_successfully_updated),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   },
