@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_egypt_with_firebase/core/helpers/shared_pref_helper.dart';
+import 'package:go_egypt_with_firebase/features/auth/user-profile.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -51,6 +54,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: emailAddress,
           password: password,
           phone: phone));
+      // to add user to database.
+      var db = FirebaseFirestore.instance;
+      var user = UserProfile(name: username, email: emailAddress,password: password,phone: phone);
+     db.collection('users').add(user.toFireStore()).then((DocumentSnapshot)async{
+        await SharedPrefHelper.setData('UserID', DocumentSnapshot.id);
+     });
+
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(e.message.toString()),

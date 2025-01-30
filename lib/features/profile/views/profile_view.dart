@@ -6,14 +6,11 @@ import 'package:go_egypt_with_firebase/core/blocs/profile/profile_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/theme_bloc/theme_bloc.dart';
 import 'package:go_egypt_with_firebase/core/core_cubits/language_cubit.dart';
 import 'package:go_egypt_with_firebase/dialog_utils.dart';
-import 'package:go_egypt_with_firebase/features/auth/user-profile.dart';
 import 'package:go_egypt_with_firebase/features/auth/views/login_page.dart';
-import 'package:go_egypt_with_firebase/features/profile/widgets/custom_editing_text_field.dart';
+import 'package:go_egypt_with_firebase/features/auth/widgets/show_editing_dialog.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/custom_list_tile.dart';
-import 'package:go_egypt_with_firebase/core/widgets/global_text_buttom.dart';
 import 'package:go_egypt_with_firebase/features/profile/widgets/profile_pic_frame.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class ProfileView extends StatefulWidget {
@@ -24,25 +21,13 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
-  String name = '';
-  String phone = '';
-  String email = '';
-  String password = '';
-
-  getCredentials() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    name = prefs.getString("name") ?? "";
-    phone = prefs.getString("phone") ?? "";
-    email = prefs.getString("email") ?? "";
-    password = prefs.getString("pass") ?? "";
-  }
 
   @override
   void initState() {
     super.initState();
     // Load profile data when the view is initialized
     context.read<ProfileBloc>().add(LoadProfile());
-    getCredentials();
+
   }
 
   @override
@@ -127,10 +112,11 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: profile.name,
                       id: 'name',
                       onPressed: () {
-                        showEditDialog(
+                        EditingDialog.showEditDialog(
                           context,
                           'name',
                           S.of(context).full_name,
+                          profile
                         );
                       },
                     ),
@@ -140,10 +126,11 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: profile.phone,
                       id: 'phone',
                       onPressed: () {
-                        showEditDialog(
+                        EditingDialog.showEditDialog(
                           context,
                           'phone',
                           S.of(context).phone_number,
+                          profile
                         );
                       },
                     ),
@@ -153,10 +140,11 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: profile.email,
                       id: 'email',
                       onPressed: () {
-                        showEditDialog(
+                        EditingDialog.showEditDialog(
                           context,
                           'email',
                           S.of(context).email_address,
+                          profile
                         );
                       },
                     ),
@@ -166,10 +154,11 @@ class _ProfileViewState extends State<ProfileView> {
                       subtitle: hashedPassword(profile.password.length),
                       id: 'password',
                       onPressed: () {
-                        showEditDialog(
+                        EditingDialog.showEditDialog(
                           context,
                           'password',
                           S.of(context).password,
+                          profile
                         );
                       },
                     ),
@@ -226,77 +215,4 @@ class _ProfileViewState extends State<ProfileView> {
     return '*' * passLength;
   }
 
-  Future<void> showEditDialog(
-      BuildContext context, String id, String title) async {
-    String editedValue = '';
-
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            '${S.of(context).edit} $title',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-          content: CustomEditingTextField(
-            id: id,
-            onChanged: (value) {
-              editedValue = value;
-            },
-          ),
-          actions: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                CustomTextButton(
-                  text: S.of(context).confirm,
-                  onPressed: () {
-                    switch (id) {
-                      case 'name':
-                        name = editedValue;
-                        break;
-                      case 'phone':
-                        phone = editedValue;
-                        break;
-                      case 'email':
-                        email = editedValue;
-                        break;
-                      case 'password':
-                        password = editedValue;
-                        break;
-                      default:
-                    }
-                    context.read<ProfileBloc>().add(
-                          UpdateProfile(
-                            profileData: UserProfile(
-                              name: name,
-                              email: email,
-                              password: password,
-                              phone: phone,
-                            ),
-                          ),
-                        );
-                    Navigator.pop(context);
-                    SnackBar snackBar = SnackBar(
-                      content:
-                          Text(S.of(context).profile_has_successfully_updated),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  },
-                ),
-                CustomTextButton(
-                  text: S.of(context).back,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
+ }
