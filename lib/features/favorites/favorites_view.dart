@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/theme_bloc/theme_bloc.dart';
 import 'package:go_egypt_with_firebase/core/helpers/is_current_locale_english.dart';
+import 'package:go_egypt_with_firebase/features/favorites/firebase_model/favorites_firebase_model.dart';
+import 'package:go_egypt_with_firebase/features/favorites/firebase_service/favorite_firebase_service.dart';
 import 'package:go_egypt_with_firebase/features/governments/models/landmarks_model.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 
@@ -15,6 +17,22 @@ class FavoritesView extends StatefulWidget {
 }
 
 class _FavoritesViewState extends State<FavoritesView> {
+  List<FavoritePlace> places = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getFavoritePlaces();
+  }
+
+  getFavoritePlaces() async {
+    var favorites = await FavoriteFirebaseService().getFavoritePlaces();
+    setState(() {
+      places = favorites;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +56,10 @@ class _FavoritesViewState extends State<FavoritesView> {
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                 ),
-                itemCount: LandmarksModel.landmarks.length,
+                itemCount: places.length,
                 itemBuilder: (BuildContext context, int index) {
-                  final landmark = LandmarksModel.landmarks[index];
+                  // final landmark = LandmarksModel.landmarks[index];
+                  final place = places[index];
                   return Card(
                     color: BlocProvider.of<ThemeBloc>(context).darkMode
                         ? Colors.grey.shade900
@@ -54,7 +73,7 @@ class _FavoritesViewState extends State<FavoritesView> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: CachedNetworkImage(
-                                imageUrl: landmark.image,
+                                imageUrl: place.image!,
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => const Center(
                                   child: CircularProgressIndicator(),
@@ -69,8 +88,8 @@ class _FavoritesViewState extends State<FavoritesView> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             isCurrentLocaleEnglish()
-                                ? landmark.enName
-                                : landmark.arName,
+                                ? place.enName!
+                                : place.arName!,
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.w600),
@@ -80,8 +99,8 @@ class _FavoritesViewState extends State<FavoritesView> {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             isCurrentLocaleEnglish()
-                                ? landmark.enGovernorateName
-                                : landmark.arGovernorateName,
+                                ? place.enGovernmentName!
+                                : place.arGovernmentName!,
                           ),
                         ),
                       ],

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_egypt_with_firebase/core/blocs/theme_bloc/theme_bloc.dart';
@@ -53,6 +54,26 @@ class _CardWidgetState extends State<CardWidget> {
                 const Spacer(),
                 IconButton(
                   onPressed: () {
+                    var db = FirebaseFirestore.instance;
+                    final data = {
+                      "enName": widget.place.enName,
+                      "arName": widget.place.arName,
+                      "image": widget.place.imagePath,
+                      "enGovernmentName": widget.card.enGovernmentName,
+                      "arGovernmentName": widget.card.arGovernmentName,
+                    };
+
+                    db
+                        .collection("favorites")
+                        .add(data)
+                        .then((documentSnapshot) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Place added to favorites'),
+                        ),
+                      );
+                    });
+
                     pressed = !pressed;
                     setState(() {});
                   },
