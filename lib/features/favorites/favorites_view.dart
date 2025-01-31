@@ -6,7 +6,6 @@ import 'package:go_egypt_with_firebase/core/blocs/theme_bloc/theme_bloc.dart';
 import 'package:go_egypt_with_firebase/core/helpers/is_current_locale_english.dart';
 import 'package:go_egypt_with_firebase/features/favorites/firebase_model/favorites_firebase_model.dart';
 import 'package:go_egypt_with_firebase/features/favorites/firebase_service/favorite_firebase_service.dart';
-import 'package:go_egypt_with_firebase/features/governments/models/landmarks_model.dart';
 import 'package:go_egypt_with_firebase/generated/l10n.dart';
 
 class FavoritesView extends StatefulWidget {

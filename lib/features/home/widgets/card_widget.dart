@@ -21,7 +21,12 @@ class CardWidget extends StatefulWidget {
 }
 
 class _CardWidgetState extends State<CardWidget> {
-  bool pressed = false;
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,9 @@ class _CardWidgetState extends State<CardWidget> {
       margin: EdgeInsets.symmetric(horizontal: 5, vertical: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: BlocProvider.of<ThemeBloc>(context).darkMode
+        color: BlocProvider
+            .of<ThemeBloc>(context)
+            .darkMode
             ? Colors.grey.shade900
             : Colors.grey.shade300,
       ),
@@ -53,34 +60,20 @@ class _CardWidgetState extends State<CardWidget> {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () {
-                    var db = FirebaseFirestore.instance;
-                    final data = {
-                      "enName": widget.place.enName,
-                      "arName": widget.place.arName,
-                      "image": widget.place.imagePath,
-                      "enGovernmentName": widget.card.enGovernmentName,
-                      "arGovernmentName": widget.card.arGovernmentName,
-                    };
-
-                    db
-                        .collection("favorites")
-                        .add(data)
-                        .then((documentSnapshot) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Place added to favorites'),
-                        ),
-                      );
-                    });
-
-                    pressed = !pressed;
+                  onPressed: () async {
+                    if (!_isFavorite) {
+                      addToFavorites();
+                      _isFavorite = true;
+                    } else {
+                      removeFromFavorites();
+                      _isFavorite = false;
+                    }
                     setState(() {});
                   },
-                  icon: Icon(
-                      pressed ? Icons.favorite : Icons.favorite_border_outlined,
-                      color:
-                          pressed ? Theme.of(context).colorScheme.error : null),
+                  icon: Icon(Icons.favorite_sharp,
+                      color: _isFavorite
+                          ? Theme.of(context).colorScheme.error
+                          : Color(0xffffffff)),
                 ),
               ],
             ),
@@ -88,5 +81,41 @@ class _CardWidgetState extends State<CardWidget> {
         ],
       ),
     );
+  }
+
+  var db = FirebaseFirestore.instance;
+
+  void addToFavorites() {
+    final data = {
+      "enName": widget.place.enName,
+      "arName": widget.place.arName,
+      "image": widget.place.imagePath,
+      "enGovernmentName": widget.card.enGovernmentName,
+      "arGovernmentName": widget.card.arGovernmentName,
+    };
+
+    db.collection("favorites").add(data).then((documentSnapshot) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Place added to favorites'),
+        ),
+      );
+    });
+  }
+
+  void removeFromFavorites() async {
+    await db
+        .collection("favorites")
+        .where("enName", isEqualTo: widget.place.enName)
+        .get()
+        .then((DocumentSnapshot) {
+      for (var doc in DocumentSnapshot.docs) {
+        db.collection("favorites").doc(doc.id).delete().then(
+              (doc) => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Place deleted from Favorite'))),
+              onError: (e) => print("Error updating document $e"),
+            );
+      }
+    });
   }
 }
