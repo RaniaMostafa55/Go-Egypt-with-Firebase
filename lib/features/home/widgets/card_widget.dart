@@ -22,10 +22,25 @@ class CardWidget extends StatefulWidget {
 
 class _CardWidgetState extends State<CardWidget> {
   bool _isFavorite = false;
+  final db = FirebaseFirestore.instance;
 
   @override
   void initState() {
+    super.initState();
+    _checkIfFavorite();
+  }
 
+  void _checkIfFavorite() async {
+    final query = await db
+        .collection("favorites")
+        .where("enName", isEqualTo: widget.place.enName)
+        .get();
+
+    if (mounted) {
+      setState(() {
+        _isFavorite = query.docs.isNotEmpty;
+      });
+    }
   }
 
   @override
@@ -35,9 +50,7 @@ class _CardWidgetState extends State<CardWidget> {
       margin: EdgeInsets.symmetric(horizontal: 5, vertical: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        color: BlocProvider
-            .of<ThemeBloc>(context)
-            .darkMode
+        color: BlocProvider.of<ThemeBloc>(context).darkMode
             ? Colors.grey.shade900
             : Colors.grey.shade300,
       ),
@@ -61,19 +74,33 @@ class _CardWidgetState extends State<CardWidget> {
                 const Spacer(),
                 IconButton(
                   onPressed: () async {
-                    if (!_isFavorite) {
-                      addToFavorites();
-                      _isFavorite = true;
-                    } else {
-                      removeFromFavorites();
-                      _isFavorite = false;
+                    final previousState = _isFavorite;
+                    // Immediate UI update
+                    setState(() => _isFavorite = !previousState);
+
+                    try {
+                      if (!previousState) {
+                        await addToFavorites();
+                      } else {
+                        await removeFromFavorites(); // Await the deletion
+                      }
+                    } catch (e) {
+                      // Revert state on error
+                      if (mounted) {
+                        setState(() => _isFavorite = previousState);
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Operation failed: ${e.toString()}')),
+                      );
                     }
-                    setState(() {});
                   },
-                  icon: Icon(Icons.favorite_sharp,
-                      color: _isFavorite
-                          ? Theme.of(context).colorScheme.error
-                          : Color(0xffffffff)),
+                  icon: Icon(
+                    Icons.favorite_sharp,
+                    color: _isFavorite
+                        ? Theme.of(context).colorScheme.error
+                        : Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -83,39 +110,59 @@ class _CardWidgetState extends State<CardWidget> {
     );
   }
 
-  var db = FirebaseFirestore.instance;
+  Future<void> addToFavorites() async {
+    try {
+      final data = {
+        "enName": widget.place.enName,
+        "arName": widget.place.arName,
+        "image": widget.place.imagePath,
+        "enGovernmentName": widget.card.enGovernmentName,
+        "arGovernmentName": widget.card.arGovernmentName,
+      };
 
-  void addToFavorites() {
-    final data = {
-      "enName": widget.place.enName,
-      "arName": widget.place.arName,
-      "image": widget.place.imagePath,
-      "enGovernmentName": widget.card.enGovernmentName,
-      "arGovernmentName": widget.card.arGovernmentName,
-    };
+      await db.collection("favorites").add(data);
 
-    db.collection("favorites").add(data).then((documentSnapshot) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Place added to favorites'),
-        ),
-      );
-    });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Place added to favorites')),
+        );
+      }
+    } catch (e) {
+      print("Error adding to favorites: $e");
+      if (mounted) {
+        setState(() {
+          _isFavorite = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add favorite')),
+        );
+      }
+    }
   }
 
-  void removeFromFavorites() async {
-    await db
-        .collection("favorites")
-        .where("enName", isEqualTo: widget.place.enName)
-        .get()
-        .then((DocumentSnapshot) {
-      for (var doc in DocumentSnapshot.docs) {
-        db.collection("favorites").doc(doc.id).delete().then(
-              (doc) => ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Place deleted from Favorite'))),
-              onError: (e) => print("Error updating document $e"),
-            );
+  Future<void> removeFromFavorites() async {
+    try {
+      final query = await db
+          .collection("favorites")
+          .where("enName", isEqualTo: widget.place.enName)
+          .get();
+
+      for (var doc in query.docs) {
+        await db.collection("favorites").doc(doc.id).delete();
       }
-    });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Place removed from favorites')),
+        );
+      }
+    } catch (e) {
+      print("Error removing from favorites: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to remove favorite')),
+        );
+      }
+    }
   }
 }
