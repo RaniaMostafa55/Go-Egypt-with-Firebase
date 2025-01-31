@@ -75,17 +75,15 @@ class _CardWidgetState extends State<CardWidget> {
                 IconButton(
                   onPressed: () async {
                     final previousState = _isFavorite;
-                    // Immediate UI update
                     setState(() => _isFavorite = !previousState);
 
                     try {
                       if (!previousState) {
                         await addToFavorites();
                       } else {
-                        await removeFromFavorites(); // Await the deletion
+                        await removeFromFavorites();
                       }
                     } catch (e) {
-                      // Revert state on error
                       if (mounted) {
                         setState(() => _isFavorite = previousState);
                       }
